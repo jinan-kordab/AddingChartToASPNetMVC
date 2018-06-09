@@ -1,0 +1,148 @@
+﻿@model AddingChartToASPNetMVC.Models.ChartModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <div style="width:360px; height:300px;">
+                <canvas id="pieChart" style="width:360px; height:300px;"></canvas>
+                <script>
+
+                    var canvas = document.getElementById("pieChart");
+                    var ctx = canvas.getContext('2d');
+
+                    Chart.defaults.global.defaultFontColor = 'black';
+                    Chart.defaults.global.defaultFontSize = 12;
+                    var theHelp = Chart.helpers;
+
+                    var data = {
+                        labels: ["VALUE A", "VALUE B", "VALUE C"],
+                        datasets: [{
+                            fill: true,
+                            backgroundColor: [
+                                '#ff6384',
+                                '#9bbb59',
+                                '#36a2eb'
+                            ],
+                            data: [@Model.firstchart_point_a,@Model.firstchart_point_b, @Model.firstchart_point_c],
+                            borderColor: ['#ff6384', '#9bbb59', '#36a2eb'],
+                            borderWidth: [1, 1, 1]
+                        }]
+                    };
+
+                    var options = {
+                        title: {
+                            display: true,
+                            text: 'First Chart',
+                            position: 'top'
+                        }
+                    };
+
+                    // Chart declaration:
+                    var myPieChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: data,
+                        options: options
+                    });
+
+                    //Plugin from githubExample:
+                    //https://github.com/chartjs/Chart.js/blob/master/samples/data_labelling.html
+
+                    Chart.plugins.register({
+                        afterDatasetsDraw: function (chartInstance, easing) {
+                            // To only draw at the end of animation, check for easing === 1
+                            var ctx = chartInstance.chart.ctx;
+
+                            var numberOfDatasets = 0;
+
+                            chartInstance.data.datasets.forEach(function (dataset, i) {
+                                numberOfDatasets = numberOfDatasets + 1;
+                            });
+
+                            if (numberOfDatasets == 1) {
+                                chartInstance.data.datasets.forEach(function (dataset, i) {
+
+                                    var meta = chartInstance.getDatasetMeta(i);
+                                    if (!meta.hidden) {
+                                        meta.data.forEach(function (element, index) {
+                                            // Draw the text in black, with the specified font
+                                            ctx.fillStyle = 'black';
+                                            var fontSize = 15;
+                                            var fontStyle = 'normal';
+                                            var fontFamily = 'Helvetica Neue';
+                                            ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
+                                            // Just naively convert to string for now
+
+                                            var dataString;
+                                            if ((dataset.data[0] + dataset.data[1] + dataset.data[2]) == "0") {
+                                                dataString = 0;
+                                            }
+                                            else {
+                                                dataString = Math.round((dataset.data[index] * 100) / (dataset.data[0] + dataset.data[1] + dataset.data[2]));
+                                            }
+                                            // Make sure alignment settings are correct
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'middle';
+                                            var padding = 5;
+                                            var position = element.tooltipPosition();
+                                            ctx.fillText(dataString + '%', position.x, position.y - (fontSize / 2) - padding);
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div style="width:365px; height:300px;text-align:center">
+                <canvas id="myChart2" style="width:365px; height:300px;"></canvas>
+                <script>
+                    var ctx = document.getElementById("myChart2").getContext("2d");
+
+                    var data = {
+                        labels: ["LABEL 1", "LABEL 2", "LABEL 3", "LABEL 4", "LABEL 5"],
+                        datasets: [{
+                            label: "VALUE ONE",
+                            backgroundColor: "#9bbb59",
+                            data: [@Model.secondchart_ds1_point_a, @Model.secondchart_ds1_point_b, @Model.secondchart_ds1_point_c, @Model.secondchart_ds1_point_e, @Model.secondchart_ds1_point_f]
+                        }, {
+                            label: "VALUE 2",
+                            backgroundColor: "#36a2eb",
+                            data: [@Model.secondchart_ds2_point_a, @Model.secondchart_ds2_point_b, @Model.secondchart_ds2_point_c, @Model.secondchart_ds2_point_e, @Model.secondchart_ds2_point_f]
+                        }]
+                    };
+
+                    var myBarChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            animation: false,
+                            legend: {
+                                display: true
+                            },
+                            title: {
+                                display: true,
+                                text: 'Second Chart'
+                            },
+                            barValueSpacing: 20,
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        min: 0,
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
